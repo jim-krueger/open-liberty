@@ -167,8 +167,19 @@ public class Headers {
                     createMutableList(policy.getHost()));
         }
         if (policy.isSetConnection()) {
-            headers.put("Connection",
-                    createMutableList(policy.getConnection().value()));
+//            headers.put("Connection",
+//                    createMutableList(policy.getConnection().value()));
+            System.out.println("Jim.... Connection starting = " + headers.get("Connection").get(0));
+            List<String> previouslySetValue = headers.get("Connection");
+            if (previouslySetValue.isEmpty()) {
+                headers.put("Connection", createMutableList(policy.getConnection().value()));
+            }
+            if (!previouslySetValue.isEmpty()) {
+                System.out.println("Jim..previouslySetValue = " +  previouslySetValue.get(0));
+                System.out.println("Jim... " + previouslySetValue.toString());
+                List<String> keep_alive = headers.get("Keep-Alive");
+                System.out.println("Jim... keep-alive = " + keep_alive.toString());
+            }
         }
         if (policy.isSetAccept()) {
             headers.put("Accept",
@@ -443,6 +454,7 @@ public class Headers {
         //TODO how to deal with the fields        
         for (Enumeration<String> e = req.getHeaderNames(); e.hasMoreElements();) {
             String fname = e.nextElement();
+            System.out.println("JimK.... copyFromRequest, fname=  " + fname);
             String mappedName = HttpHeaderHelper.getHeaderKey(fname);
             List<String> values = headers.get(mappedName);
             if (values == null) {

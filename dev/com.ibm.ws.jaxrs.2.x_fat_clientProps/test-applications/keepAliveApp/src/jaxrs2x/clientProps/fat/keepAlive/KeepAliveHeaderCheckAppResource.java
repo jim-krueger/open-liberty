@@ -37,10 +37,12 @@ public class KeepAliveHeaderCheckAppResource extends Application {
     public void init() {
         System.out.println("KeepAliveHeaderCheckAppResource - started");
     }
-
+    
     @GET
     public Response checkForConnectionHeader(@Context HttpHeaders headers) {
         String connHeader = headers.getHeaderString("Connection");
+        String klHeader = headers.getHeaderString("Keep-Alive");
+        System.out.println("JimK.... keep-alive header = " + klHeader);
         String expectedConnHeader = headers.getHeaderString("Expect-Connection");
         if (expectedConnHeader == null) {
             return fail("expected value is null - unable to check");
@@ -50,6 +52,26 @@ public class KeepAliveHeaderCheckAppResource extends Application {
             return fail("Connection header value, " + connHeader + " is not what was expected, " + expectedConnHeader);
         }
         return Response.ok("success").build();
+    }
+    
+    @Path("/timeout today")
+    @GET
+    public Response checkForTimeout(@Context HttpHeaders headers) {
+        String connHeader = headers.getHeaderString("Connection");
+        System.out.println("JimK.... connection header = " + connHeader);
+        String klHeader = headers.getHeaderString("Keep-Alive2");
+        System.out.println("JimK.... keep-alive header = " + klHeader);
+        String expectedConnHeader = headers.getHeaderString("Expect-Connection");
+        System.out.println("JimK... expect-Connection header = " + expectedConnHeader);
+
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            //no-op
+        }
+        // Should hit connection timeout before now.
+        return Response.ok("fail").build();
     }
 
 }

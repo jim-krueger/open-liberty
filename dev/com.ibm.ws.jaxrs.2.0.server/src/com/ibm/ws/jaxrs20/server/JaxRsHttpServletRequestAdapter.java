@@ -738,6 +738,10 @@ public class JaxRsHttpServletRequestAdapter extends HttpServletRequestWrapper im
      */
     @Override
     public Enumeration<String> getHeaders(String arg0) {
+        if (arg0.equals("Expect-Connection")) {
+            System.out.println("Jim.... getHeaders");
+            Thread.dumpStack();
+        }
         try {
             collaborator.preInvoke(componentMetaData);
             return request.getHeaders(arg0);

@@ -16,8 +16,13 @@
 	</featureManager>
 
 	<include location="../fatTestPorts.xml" />
+	
+    <javaPermission className="java.lang.RuntimePermission" name="*" actions="accessClassInPackage.com.sun.xml.internal.bind.v2.runtime.reflect"/>
+	
 	<variable name="onError" value="FAIL" />
 
 	<application location="BasicSseApp.war"/>
+	
+
 
 </server>

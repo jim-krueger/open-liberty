@@ -52,12 +52,14 @@ public class BasicSseResource extends Application {
     @Produces(MediaType.SERVER_SENT_EVENTS)
     public void send3PlainEvents(@Context SseEventSink eventSink, @Context Sse sse) {
         String[] eventData = new String[] { "uno", "dos", "tres" };
+        Thread.dumpStack();
         Runnable r = new Runnable() {
 
             @Override
             public void run() {
                 try (SseEventSink sink = eventSink) {
                     for (int i = 0; i < eventData.length; i++) {
+//                        Thread.dumpStack();
                         System.out.println("BasicSseResource.send3PlainEvents() sending: " + eventData[i]);
                         sink.send(sse.newEvent(eventData[i]));
                         try {

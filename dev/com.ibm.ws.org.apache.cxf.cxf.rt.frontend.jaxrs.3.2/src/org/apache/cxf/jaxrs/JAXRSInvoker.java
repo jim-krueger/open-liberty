@@ -107,15 +107,19 @@ public class JAXRSInvoker extends AbstractInvoker {
         try {
             rootInstance = getServiceObject(exchange);
             Object serviceObject = getActualServiceObject(exchange, rootInstance);
-
-            return invoke(exchange, request, serviceObject);
+            System.out.println("Jim... JAXRSInvoker.invoke: calling invoke");
+            Object invokeReturn = invoke(exchange, request, serviceObject);
+            System.out.println("Jim... JAXRSInvoker.invoke: return from invoke");
+            return invokeReturn;
         } catch (WebApplicationException ex) {
+            System.out.println("Jim... JAXRSInvoker.invoke: caught exception " + ex);
             responseList = checkExchangeForResponse(exchange);
             if (responseList != null) {
                 return responseList;
             }
             return handleFault(ex, inMessage);
         } finally {
+            System.out.println("Jim... JAXRSInvoker.invoke: in finally");
             boolean suspended = isSuspended(exchange);
             if (suspended || exchange.isOneWay() || inMessage.get(Message.THREAD_CONTEXT_SWITCHED) != null) {
                 ServerProviderFactory.clearThreadLocalProxies(inMessage);
@@ -214,6 +218,7 @@ public class JAXRSInvoker extends AbstractInvoker {
                 }
             }
         } catch (Fault ex) {
+            System.out.println("Jim... JAXRSInvoker.invoke: caught Fault " + ex);
             Object faultResponse;
             if (asyncResponse != null) {
                 faultResponse = handleAsyncFault(exchange, asyncResponse,
@@ -221,6 +226,7 @@ public class JAXRSInvoker extends AbstractInvoker {
             } else {
                 faultResponse = handleFault(ex, inMessage, cri, methodToInvoke);
             }
+            System.out.println("Jim... JAXRSInvoker.invoke: faultResponse = " + faultResponse.toString());
             return faultResponse;
         } finally {
             exchange.put(LAST_SERVICE_OBJECT, resourceObject);
@@ -403,9 +409,11 @@ public class JAXRSInvoker extends AbstractInvoker {
     }
     private Object handleFault(Fault ex, Message inMessage,
                                ClassResourceInfo cri, Method methodToInvoke) {
+        System.out.println("Jim... JAXRSInvoker.handleFault:  ex = " + ex);
         String errorMessage = ex.getMessage();
         if (errorMessage != null && cri != null
             && errorMessage.contains(PROXY_INVOCATION_ERROR_FRAGMENT)) {
+            System.out.println("Jim... JAXRSInvoker.handleFault:  1");
             org.apache.cxf.common.i18n.Message errorM =
                 new org.apache.cxf.common.i18n.Message("PROXY_INVOCATION_FAILURE",
                                                        BUNDLE,
@@ -413,13 +421,20 @@ public class JAXRSInvoker extends AbstractInvoker {
                                                        cri.getServiceClass().getName());
             LOG.severe(errorM.toString());
         }
+        System.out.println("Jim... JAXRSInvoker.handleFault:  2");
+        System.out.println("Jim... JAXRSInvoker.handleFault:  ex.getCause(): " + ex.getCause());
+        System.out.println("Jim... JAXRSInvoker.handleFault:  inMessage: " + inMessage);
         Response excResponse =
             JAXRSUtils.convertFaultToResponse(ex.getCause() == null ? ex : ex.getCause(), inMessage);
         if (excResponse == null) {
             inMessage.getExchange().put(Message.PROPOGATE_EXCEPTION,
                                         ExceptionUtils.propogateException(inMessage));
+            System.out.println("Jim... JAXRSInvoker.handleFault:  throwing ex " + ex);
+
             throw ex;
         }
+        System.out.println("Jim... JAXRSInvoker.handleFault:  returning MessageContentsList, " + excResponse);
+
         return new MessageContentsList(excResponse);
     }
 

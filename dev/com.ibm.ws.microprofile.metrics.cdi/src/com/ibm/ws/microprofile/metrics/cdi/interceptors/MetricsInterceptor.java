@@ -116,7 +116,13 @@ public class MetricsInterceptor {
         return target;
     }
 
-    private <E extends Member & AnnotatedElement> void registerMetrics(Class<?> bean, E element) {
+    private <E extends Member & AnnotatedElement> void registerMetrics(Class<?> bean, E element) throws Exception {
+
+        if (true) {
+            System.out.println("MetricsInterceptor: About to throw an exception");
+            throw new Exception("exception explosion");
+        }
+
         MetricResolver.Of<Counted> counted = resolver.counted(bean, element);
         if (counted.isPresent()) {
             registry.counter(counted.metadata());

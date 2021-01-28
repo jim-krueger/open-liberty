@@ -106,17 +106,23 @@ public abstract class AbstractInvoker implements Invoker {
 
             return new MessageContentsList(res);
         } catch (InvocationTargetException e) {
+            System.out.println("Jim... AbstractInvoker.invoke: " + e);
+            e.printStackTrace();
 
             Throwable t = e.getCause();
+            System.out.println("Jim... AbstractInvoker.invoke t1: " + t);
 
             if (t == null) {
                 t = e;
+                System.out.println("Jim... AbstractInvoker.invoke t2: " + t);
             }
 
             checkSuspendedInvocation(exchange, serviceObject, m, params, t);
+            System.out.println("Jim... AbstractInvoker.invoke getInMessage");
 
             exchange.getInMessage().put(FaultMode.class, FaultMode.UNCHECKED_APPLICATION_FAULT);
 
+            System.out.println("Jim... AbstractInvoker.invoke for loop");
 
             for (Class<?> cl : m.getExceptionTypes()) {
                 if (cl.isInstance(t)) {
@@ -124,13 +130,20 @@ public abstract class AbstractInvoker implements Invoker {
                                                 FaultMode.CHECKED_APPLICATION_FAULT);
                 }
             }
+            System.out.println("Jim... AbstractInvoker.invoke check for instanceof Fault");
 
             if (t instanceof Fault) {
+                System.out.println("Jim... AbstractInvoker.invoke is instanceof Fault");
                 exchange.getInMessage().put(FaultMode.class,
                                             FaultMode.CHECKED_APPLICATION_FAULT);
+                System.out.println("Jim... AbstractInvoker.invoke throwing Fault");
                 throw (Fault)t;
             }
-            throw createFault(t, m, params, true);
+            Fault f = createFault(t, m, params, true);
+            System.out.println("Jim... AbstractInvoker.invoke throwing Fault2");
+            f.printStackTrace();
+            throw f;
+//            throw createFault(t, m, params, true);
         } catch (SuspendedInvocationException suspendedEx) {
             // to avoid duplicating the same log statement
             checkSuspendedInvocation(exchange, serviceObject, m, params, suspendedEx);
@@ -163,6 +176,7 @@ public abstract class AbstractInvoker implements Invoker {
 
     protected Fault createFault(Throwable ex, Method m, List<Object> params, boolean checked) {
 
+        System.out.println("Jim...AbstractInvoker.createFault: checked = " + checked);
         if (checked) {
             return new Fault(ex);
         }
